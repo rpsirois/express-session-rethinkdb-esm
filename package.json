@@ -1,0 +1,21 @@
+{
+  "name": "express-session-rethinkdb-esm",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Robert Sirois",
+  "homepage": "https://github.com/rpsirois/express-session-rethinkdb-esm#readme",
+  "bugs": {
+    "url": "https://github.com/rpsirois/express-session-rethinkdb-esm/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:rpsirois/express-session-rethinkdb-esm.git"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./rdb-session.js"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {}
+}

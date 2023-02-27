@@ -1,6 +1,6 @@
 {
   "name": "express-session-rethinkdb-esm",
-  "version": "0.0.3",
+  "version": "0.0.2",
   "license": "MIT",
   "author": "Robert Sirois",
   "homepage": "https://github.com/rpsirois/express-session-rethinkdb-esm#readme",

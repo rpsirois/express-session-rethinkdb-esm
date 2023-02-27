@@ -4,7 +4,7 @@
 
 Thank you to everyone writing `express-session` drivers out there for the boilerplate and inspiration.
 
-**Note**: Sessions are not vacuumed by the adapter like some of the others out there (setInterval and friends). Pull requests welcome :)
+**Note**: Sessions are not vacuumed by the adapter like some of the others out there (`setInterval` and friends). Pull requests welcome :)
 
 ## Installation
 
@@ -26,7 +26,7 @@ const app = express()
 const RethinkdbSessionStore = await _init_rdb_express_session_store({ session })
 
 app.use( session({
-    store: new RethinkdbSessionStore({ client: r, conn: root_rc })
+    store: new RethinkdbSessionStore({ client: r, conn: rc })
 })
 ```
 

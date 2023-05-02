@@ -10,7 +10,9 @@ export default cfg => (
             Object.assign(this, defaults, opt)
             if (! this.client) throw new Error('RethinkdbSessionStore requires a client in setup options.')
             if (! this.conn) throw new Error('RethinkdbSessionStore requires a connection in setup options.')
-            this.initDb(this.client, this.conn)
+            let _p_then
+            this.ready = new Promise( then => _p_then = then )
+            this.initDb( this.client, this.conn, _p_then )
         }
 
         getExpiry( cookie ) {
@@ -19,13 +21,15 @@ export default cfg => (
                 : new Date(Date.now() + this.ttl)
         }
 
-        async initDb( r, rc ) {
+        async initDb( r, rc, then ) {
             let { table } = this
             let existing_tables = await r.tableList().run(rc)
 
             if (existing_tables.indexOf( table ) < 0)
                 await r.tableCreate( table ).run(rc)
             this._t = r.table(table)
+            then( this._t )
+            return this._t
         }
 
         async all( cb ) {

@@ -3,6 +3,8 @@ const defaults = {
     table: 'sessions',
 }
 
+let r
+
 export default cfg => (
     class RethinkdbSessionStore extends cfg.session.Store {
         constructor( opt ) {
@@ -21,20 +23,33 @@ export default cfg => (
                 : new Date(Date.now() + this.ttl)
         }
 
-        async initDb( r, rc, then ) {
+        async initDb( _r, rc, then ) {
+            r = _r
             let { table } = this
-            let existing_tables = await r.tableList().run(rc)
 
-            if (existing_tables.indexOf( table ) < 0)
-                await r.tableCreate( table ).run(rc)
-            this._t = r.table(table)
-            then( this._t )
-            return this._t
+            // table
+            const existing_tables = new Set( await r.tableList().run( rc ) )
+
+            if ( !existing_tables.has( table ) ) await r.tableCreate( table ).run(rc)
+
+            const _t = this._t = r.table( table )
+
+            // index
+            const existing_indices = new Set( await _t.indexList().run( rc ) )
+
+            if ( !existing_indices.has( 'expires' ) ) {
+                await _t.indexCreate( 'expires' ).run( rc )
+                await _t.indexWait( 'expires' ).run( rc )
+            }
+
+            // ready
+            then( _t )
+            return _t
         }
 
         async all( cb ) {
             try {
-                let result = await this._t.run( this.conn ).toArray()
+                let result = await ( await this._t.run( this.conn ) ).toArray()
                 cb?.( null, result )
                 return result
             } catch (err) {
@@ -129,6 +144,19 @@ export default cfg => (
             } catch (err) {
                 if (!cb) throw err
                 cb(err)
+            }
+        }
+
+        // custom functions (not part of the express-session Session Store Implementation)
+
+        // clear table of expired sessions
+        async vacuum( cb ) {
+            try {
+                await this._t.between( r.minval, new Date( Date.now() - this.ttl ), {index: 'expires'} ).delete().run( this.conn )
+                cb?.()
+            } catch ( err ) {
+                if ( !cb ) throw err
+                cb( err )
             }
         }
     })

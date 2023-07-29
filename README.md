@@ -10,6 +10,16 @@ Thank you to everyone writing `express-session` drivers out there for the boiler
 
 `npm install express-session-rethinkdb-esm --save`
 
+## Constructor Options
+
+`client`: **Required** -- RethinkDB import.
+
+`conn`: **Required** -- RethinkDB database connection.
+
+`table`: RethinkDB table to store sessions in (default: `sessions`).
+
+`ttl`: Time in milliseconds to expire sessions (default: two weeks).
+
 ## Usage
 
 ```javascript
@@ -30,12 +40,17 @@ app.use( session({
 })
 ```
 
-## Constructor Options
+### Wait on Readiness
 
-`client`: **Required** -- RethinkDB import.
+Using the `ready` property to wait for store initialization. Store will ensure the `table` table is created and has a secondary index for `expires` if not already.
 
-`conn`: **Required** -- RethinkDB database connection.
+```javascript
+// Thennable
+rethinkdbSessionStoreInstance.ready.then( async () => {
+    await rethinkdbSessionStoreInstance.vacuum()
+})
 
-`table`: RethinkDB table to store sessions in (default: `sessions`).
-
-`ttl`: Time in milliseconds to expire sessions (default: two weeks).
+// Async/Await
+await rethinkdbSessionStoreInstance.ready
+await rethinkdbSessionStoreInstance.vacuum()
+```
